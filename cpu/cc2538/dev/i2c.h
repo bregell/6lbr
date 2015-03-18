@@ -10,66 +10,66 @@
  * \file
  * /cpu/cc2538/dev/i2c.h
  * Header file with declarations for the I2C Control module
- * 
+ *
  * \author
  * Mehdi Migault
  */
 #ifndef I2C_H_
 #define I2C_H_
- 
+
 #include "reg.h"
-#include "sys-ctrl.h"
-#include "gpio.h"
-#include "ioc.h"
-#include <stdio.h>		//For debug
-#include "clock.h"		//For temporisation
+#include "dev/sys-ctrl.h"
+#include "dev/gpio.h"
+#include "dev/ioc.h"
+#include <stdio.h>    /* For debug */
+#include "clock.h"    /* For temporisation */
 /*---------------------------------------------------------------------------*/
 /** \name I2C Master commands
  * @{
  */
-#define I2C_MASTER_CMD_SINGLE_SEND				0x00000007
-#define I2C_MASTER_CMD_SINGLE_RECEIVE			0x00000007
-#define I2C_MASTER_CMD_BURST_SEND_START			0x00000003
-#define I2C_MASTER_CMD_BURST_SEND_CONT			0x00000001
-#define I2C_MASTER_CMD_BURST_SEND_FINISH		0x00000005
-#define I2C_MASTER_CMD_BURST_SEND_ERROR_STOP	0x00000004
-#define I2C_MASTER_CMD_BURST_RECEIVE_START		0x0000000b
-#define I2C_MASTER_CMD_BURST_RECEIVE_CONT		0x00000009
-#define I2C_MASTER_CMD_BURST_RECEIVE_FINISH		0x00000005
-#define I2C_MASTER_CMD_BURST_RECEIVE_ERROR_STOP	0x00000004
+#define I2C_MASTER_CMD_SINGLE_SEND              0x00000007
+#define I2C_MASTER_CMD_SINGLE_RECEIVE           0x00000007
+#define I2C_MASTER_CMD_BURST_SEND_START         0x00000003
+#define I2C_MASTER_CMD_BURST_SEND_CONT          0x00000001
+#define I2C_MASTER_CMD_BURST_SEND_FINISH        0x00000005
+#define I2C_MASTER_CMD_BURST_SEND_ERROR_STOP    0x00000004
+#define I2C_MASTER_CMD_BURST_RECEIVE_START      0x0000000b
+#define I2C_MASTER_CMD_BURST_RECEIVE_CONT       0x00000009
+#define I2C_MASTER_CMD_BURST_RECEIVE_FINISH     0x00000005
+#define I2C_MASTER_CMD_BURST_RECEIVE_ERROR_STOP 0x00000004
 /** @} */
 /*---------------------------------------------------------------------------*/
 /** \name I2C Master statut flags
  * @{
  */
-#define I2C_MASTER_ERR_NONE	0
-#define I2CM_STAT_BUSY		0x00000001
-#define I2CM_STAT_ERROR		0x00000002
-#define I2CM_STAT_ADRACK	0x00000004
-#define I2CM_STAT_DATACK	0x00000008
-#define I2CM_STAT_ARBLST	0x00000010
-#define I2CM_STAT_IDLE		0x00000020
-#define I2CM_STAT_BUSBSY	0x00000040
+#define I2C_MASTER_ERR_NONE 0
+#define I2CM_STAT_BUSY      0x00000001
+#define I2CM_STAT_ERROR     0x00000002
+#define I2CM_STAT_ADRACK    0x00000004
+#define I2CM_STAT_DATACK    0x00000008
+#define I2CM_STAT_ARBLST    0x00000010
+#define I2CM_STAT_IDLE      0x00000020
+#define I2CM_STAT_BUSBSY    0x00000040
 /** @} */
 /*---------------------------------------------------------------------------*/
 /** \name I2C registers
  * @{
  */
-#define I2CM_CR		0x40020020	//I2C master config
-#define I2CM_TPR	0x4002000C	//I2C master timer period
-#define I2CM_SA		0x40020000	//I2C master slave address
-#define I2CM_DR		0x40020008	//I2C master data
-#define I2CM_CTRL	0x40020004	//Master control in write
-#define I2CM_STAT	I2CM_CTRL	//Master status in read
+#define I2CM_CR     0x40020020  //I2C master config
+#define I2CM_TPR    0x4002000C  //I2C master timer period
+#define I2CM_SA     0x40020000  //I2C master slave address
+#define I2CM_DR     0x40020008  //I2C master data
+#define I2CM_CTRL   0x40020004  //Master control in write
+#define I2CM_STAT   I2CM_CTRL   //Master status in read
 /** @} */
 /*---------------------------------------------------------------------------*/
 /** \name I2C Miscellaneous
  * @{
  */
-#define I2C_SCL_NORMAL_BUS_SPEED	100000	//100KHz I2C
-#define I2C_SCL_FAST_BUS_SPEED		400000	//400KHz I2C
-#define I2C_RECEIVE		0x01	//Master receive
-#define I2C_SEND		0x00	//Master send
+#define I2C_SCL_NORMAL_BUS_SPEED    100000  //100KHz I2C
+#define I2C_SCL_FAST_BUS_SPEED      400000  //400KHz I2C
+#define I2C_RECEIVE     0x01    //Master receive
+#define I2C_SEND        0x00    //Master send
 /** @} */
 
 /*---------------------------------------------------------------------------*/
@@ -184,6 +184,24 @@ uint8_t i2c_single_send(uint8_t slave_addr, uint8_t data);
  */
 uint8_t i2c_single_receive(uint8_t slave_addr, uint8_t * data);
 
+/**
+ * \brief   Perform all operations to send a burst of bytes to a slave
+ * \param   slave_addr  The adress of the slave to which data are sent
+ * \param   data        The data to send to the slave
+ * \param   size        The size of the data array
+ * \return  Return the value of i2c_master_error() after the I2C operation
+ */
+uint8_t i2c_burst_send(uint8_t slave_addr, uint8_t * data, uint8_t size);
+
+/**
+ * \brief   Perform all operations to receive a burst of bytes from a slave
+ * \param   slave_addr  The adress of the slave from which data are received
+ * \param   data        A pointer to store the received data
+ * \param   size        The size of the data array
+ * \return  Return the value of i2c_master_error() after the I2C operation
+ */
+uint8_t i2c_burst_receive(uint8_t slave_addr, uint8_t * data, uint8_t size);
+
 /** @} */
 
 /** \name I2C additional functions
@@ -201,7 +219,6 @@ uint32_t get_sys_clock(void);
 
 /** @} */
 #endif /* I2C_H_ */
-
 /**
  * @}
  * @}

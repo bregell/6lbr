@@ -29,14 +29,24 @@
  *
  */
 
+/**
+ * \addtogroup platform
+ * @{
+ *
+ * \defgroup openmote The OpenMote Platform
+ *
+ * \file
+ * Driver for the antenna selection on the OpenMote-CC2538 platform.
+ */
+
+/*---------------------------------------------------------------------------*/
 #include "contiki-conf.h"
 #include "dev/gpio.h"
 #include "antenna.h"
-
+/*---------------------------------------------------------------------------*/
 #define BSP_RADIO_BASE              (GPIO_D_BASE)
 #define BSP_RADIO_INT               (1 << 5)
 #define BSP_RADIO_EXT               (1 << 4)
-
 /*---------------------------------------------------------------------------*/
 static void
 gpio_set(int port, int bit)
@@ -64,7 +74,7 @@ antenna_init(void)
 
   /* Select external antenna by default. */
   antenna_external();
- }
+}
 /*---------------------------------------------------------------------------*/
 /**
  * Select the external (connector) antenna
@@ -86,3 +96,4 @@ antenna_internal(void)
   gpio_set(BSP_RADIO_BASE, BSP_RADIO_INT);
 }
 /*---------------------------------------------------------------------------*/
+/** @} */

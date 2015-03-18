@@ -28,15 +28,19 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+
 /**
- * \addtogroup openmote-cc2538
+ * \addtogroup platform
  * @{
  *
- * \defgroup openmote-cc2538-button-sensor OpenMote-CC2538 Button Driver
+ * \defgroup openmote The OpenMote Platform
  *
  * \file
  * Driver for the OpenMote-CC2538 buttons
+ *
  */
+
+/*---------------------------------------------------------------------------*/
 #include "contiki.h"
 #include "dev/nvic.h"
 #include "dev/ioc.h"
@@ -92,7 +96,6 @@ btn_callback(uint8_t port, uint8_t pin)
   if(!timer_expired(&debouncetimer)) {
     return;
   }
-
   timer_set(&debouncetimer, CLOCK_SECOND / 8);
   if(port == GPIO_C_NUM) {
     sensors_changed(&button_user_sensor);
@@ -130,5 +133,5 @@ button_sensor_init()
 }
 /*---------------------------------------------------------------------------*/
 SENSORS_SENSOR(button_user_sensor, BUTTON_SENSOR, NULL, config_user, NULL);
-
+/*---------------------------------------------------------------------------*/
 /** @} */

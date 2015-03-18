@@ -28,27 +28,25 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-/** \addtogroup openmote-cc2538
+/**
+ * \addtogroup platform
  * @{
  *
- * \defgroup openmote-cc2538 Peripherals
- *
- * Defines related to the OpenMote-CC2538
- *
- * This file provides connectivity information on LEDs, Buttons, UART and
- * other peripherals
- * @{
+ * \defgroup openmote The OpenMote Platform
  *
  * \file
  * Header file with definitions related to the I/O connections on the
- * OpenMote
+ * OpenMote-CC2538 platform. This file provides connectivity information on
+ * LEDs, Buttons, UART and other peripherals.
  *
- * \note   Do not include this file directly. It gets included by contiki-conf
- *         after all relevant directives have been set.
+ * \note
+ * Do not include this file directly. It gets included by contiki-conf
+ * after all relevant directives have been set.
  */
+
 #ifndef BOARD_H_
 #define BOARD_H_
-
+/*---------------------------------------------------------------------------*/
 #include "dev/gpio.h"
 #include "dev/nvic.h"
 /*---------------------------------------------------------------------------*/
@@ -145,15 +143,27 @@
 /** @} */
 /*---------------------------------------------------------------------------*/
 /**
+ * \name I2C configuration
+ *
+ * These values configure which CC2538 pins to use for the I2C lines.
+ * @{
+ */
+#define I2C_INT0_PORT             GPIO_B_NUM        //DI8
+#define I2C_INT0_PIN              2
+#define I2C_SCL_PORT                GPIO_B_NUM      //PWM1
+#define I2C_SCL_PIN               3
+#define I2C_SDA_PORT              GPIO_B_NUM        //PWM0
+#define I2C_SDA_PIN               4
+#define I2C_INT1_PORT             GPIO_B_NUM        //DO8
+#define I2C_INT1_PIN              5
+/** @} */
+/*---------------------------------------------------------------------------*/
+/**
  * \name Device string used on startup
  * @{
  */
 #define BOARD_STRING "OpenMote-CC2538"
 /** @} */
-
+/*---------------------------------------------------------------------------*/
 #endif /* BOARD_H_ */
-
-/**
- * @}
- * @}
- */
+/** @} */

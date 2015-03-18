@@ -27,16 +27,13 @@
  * SUCH DAMAGE.
  */
 /**
- * \addtogroup cc2538
+ * \addtogroup cc2538-spi
  * @{
  *
- * Implementation of the low-level SPI primitives such as waiting for the TX
- * FIFO to be ready, inserting into the TX FIFO, etc.
- * @{
- */
-/**
  * \file
- * Header file for the cc2538 SPI commands
+ * Header file for the cc2538 SPI driver, including macros for the
+ * implementation of the low-level SPI primitives such as waiting for the TX
+ * FIFO to be ready, inserting into the TX FIFO, etc.
  */
 #ifndef SPI_ARCH_H_
 #define SPI_ARCH_H_
@@ -63,7 +60,6 @@
 #error "You must include spi-arch.h before spi.h for the CC2538."
 #endif
 #define SPI_FLUSH() do { \
-  SPI_WAITFOREORx(); \
   while (REG(SSI0_BASE + SSI_SR) & SSI_SR_RNE) { \
     SPI_RXBUF; \
   } \
@@ -121,6 +117,5 @@ void spi_set_mode(uint32_t frame_format, uint32_t clock_polarity,
 #endif /* SPI_ARCH_H_ */
 
 /**
- * @}
  * @}
  */

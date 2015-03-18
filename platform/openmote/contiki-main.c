@@ -32,17 +32,17 @@
  * \addtogroup platform
  * @{
  *
- * \defgroup cc2538 The OpenMote-CC2538 platform
- *
+ * \defgroup openmote The OpenMote Platform
  * The OpenMote-CC2538 is based on the CC2538, the new platform by Texas Instruments
- *  based on an ARM Cortex-M3 core and a IEEE 802.15.4 radio.
- * @{
+ * based on an ARM Cortex-M3 core and a IEEE 802.15.4 radio.
  *
  * \file
- *   Main module for the OpenMote-CC2538 platform
+ * Main module for the OpenMote-CC2538 platform
  */
+
 /*---------------------------------------------------------------------------*/
 #include "contiki.h"
+#include "dev/adc.h"
 #include "dev/leds.h"
 #include "dev/sys-ctrl.h"
 #include "dev/scb.h"
@@ -67,6 +67,7 @@
 #include "ieee-addr.h"
 #include "lpm.h"
 
+#include "dev/i2c.h"
 #include "antenna.h"
 
 #include <stdint.h>
@@ -149,6 +150,8 @@ main(void)
   rtimer_init();
   gpio_init();
 
+  i2c_init(I2C_SDA_PORT, I2C_SDA_PIN, I2C_SCL_PORT, I2C_SCL_PIN, I2C_SCL_FAST_BUS_SPEED);
+
   leds_init();
   fade(LEDS_YELLOW);
 
@@ -207,7 +210,7 @@ main(void)
 
   set_rf_params();
   netstack_init();
-  
+
   antenna_init();
   PRINTF(" Antenna: external\n");
 
@@ -218,6 +221,8 @@ main(void)
   process_start(&tcpip_process, NULL);
 #endif
 #endif /* NETSTACK_CONF_WITH_IPV6 */
+
+  adc_init();
 
   process_start(&sensors_process, NULL);
 
@@ -243,8 +248,4 @@ main(void)
   }
 }
 /*---------------------------------------------------------------------------*/
-
-/**
- * @}
- * @}
- */
+/** @} */

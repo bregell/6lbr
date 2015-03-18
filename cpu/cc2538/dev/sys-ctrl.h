@@ -32,7 +32,7 @@
  * \addtogroup cc2538
  * @{
  *
- * \defgroup cc2538-sys-ctrl cc2538 System Control
+ * \defgroup cc2538-sys-ctrl cc2538 System Control (SysCtrl)
  *
  * Driver for the cc2538 System Control Module
  * @{
@@ -157,6 +157,34 @@
 #define SYS_CTRL_SRGPT_GPT2     0x00000004  /**< GPT2 is reset */
 #define SYS_CTRL_SRGPT_GPT1     0x00000002  /**< GPT1 is reset */
 #define SYS_CTRL_SRGPT_GPT0     0x00000001  /**< GPT0 is reset */
+/** @} */
+/*---------------------------------------------------------------------------*/
+/** \name SYS_CTRL_RCGCSEC register bit masks
+ * @{
+ */
+#define SYS_CTRL_RCGCSEC_AES    0x00000002  /**< AES clock enable, CPU running */
+#define SYS_CTRL_RCGCSEC_PKA    0x00000001  /**< PKA clock enable, CPU running */
+/** @} */
+/*---------------------------------------------------------------------------*/
+/** \name SYS_CTRL_SCGCSEC register bit masks
+ * @{
+ */
+#define SYS_CTRL_SCGCSEC_AES    0x00000002  /**< AES clock enable, CPU IDLE */
+#define SYS_CTRL_SCGCSEC_PKA    0x00000001  /**< PKA clock enable, CPU IDLE */
+/** @} */
+/*---------------------------------------------------------------------------*/
+/** \name SYS_CTRL_DCGCSEC register bit masks
+ * @{
+ */
+#define SYS_CTRL_DCGCSEC_AES    0x00000002  /**< AES clock enable, PM0 */
+#define SYS_CTRL_DCGCSEC_PKA    0x00000001  /**< PKA clock enable, PM0 */
+/** @} */
+/*---------------------------------------------------------------------------*/
+/** \name SYS_CTRL_SRSEC register bits
+ * @{
+ */
+#define SYS_CTRL_SRSEC_AES      0x00000002  /**< AES is reset */
+#define SYS_CTRL_SRSEC_PKA      0x00000001  /**< PKA is reset */
 /** @} */
 /*---------------------------------------------------------------------------*/
 /** \name SYS_CTRL_PWRDBG register bits

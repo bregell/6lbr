@@ -1,10 +1,13 @@
 /**
- * \addtogroup openmote
+ * \addtogroup platform
  * @{
  *
+ * \defgroup openmote The OpenMote Platform
+ *
  * \file
- *  Configuration for the OpenMote-CC2538 platform
+ * Configuration for the OpenMote-CC2538 platform.
  */
+
 #ifndef CONTIKI_CONF_H_
 #define CONTIKI_CONF_H_
 
@@ -46,7 +49,7 @@ typedef uint32_t rtimer_clock_t;
  * @{
  */
 #ifndef FLASH_CCA_CONF_BOOTLDR_BACKDOOR
-#define FLASH_CCA_CONF_BOOTLDR_BACKDOOR	1 /**<Enable the boot loader backdoor */
+#define FLASH_CCA_CONF_BOOTLDR_BACKDOOR 1 /**<Enable the boot loader backdoor */
 #endif
 
 #ifndef FLASH_CCA_CONF_BOOTLDR_BACKDOOR_PORT_A_PIN
@@ -79,7 +82,7 @@ typedef uint32_t rtimer_clock_t;
  * @{
  */
 #ifndef WATCHDOG_CONF_ENABLE
-#define WATCHDOG_CONF_ENABLE	      1 /**< Enable the watchdog timer */
+#define WATCHDOG_CONF_ENABLE          1 /**< Enable the watchdog timer */
 #endif
 /** @} */
 /*---------------------------------------------------------------------------*/
