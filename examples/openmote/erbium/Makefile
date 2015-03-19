@@ -21,6 +21,8 @@ SMALL=1
 APPS += er-coap
 APPS += rest-engine
 
+#Add Drowsie
+MODULES += core/net/mac/drowsie
 
 CONTIKI_WITH_IPV6 = 1
 include $(CONTIKI)/Makefile.include
@@ -39,4 +41,4 @@ connect-router-native:	$(CONTIKI)/examples/ipv6/native-border-router/border-rout
 	sudo $(CONTIKI)/exmples/ipv6/native-border-router/border-router.native -a 127.0.0.1 -p 60001 aaaa::1/64
 
 connect-minimal:
-	sudo ip address add fdfd::1/64 dev tap0 
+	sudo ip address add fdfd::1/64 dev tap0
