@@ -224,7 +224,10 @@ main(void)
 
   adc_init();
 
+#if OPEMOTE_OPENBATTERY
+  PRINTF(" Starting sensor process \n")
   process_start(&sensors_process, NULL);
+#endif
 
   energest_init();
   ENERGEST_ON(ENERGEST_TYPE_CPU);
