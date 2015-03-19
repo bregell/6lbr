@@ -41,6 +41,7 @@
 #include <string.h>
 
 #include "er-coap.h"
+#include "er-coap-engine.h"
 #include "er-coap-observe-client.h"
 
 /* Compile this code only if client-side support for CoAP Observe is required */
@@ -107,6 +108,7 @@ coap_obs_add_observee(uip_ipaddr_t *addr, uint16_t port,
   o = memb_alloc(&obs_subjects_memb);
   if(o) {
     o->url = url;
+    o->ctx = coap_default_context;
     uip_ipaddr_copy(&o->addr, addr);
     o->port = port;
     o->token_len = token_len;
@@ -191,7 +193,7 @@ coap_obs_remove_observee_by_url(uip_ipaddr_t *addr, uint16_t port,
 }
 /*----------------------------------------------------------------------------*/
 static void
-simple_reply(coap_message_type_t type, uip_ip6addr_t *addr, uint16_t port,
+simple_reply(coap_message_type_t type, context_t *ctx, uip_ip6addr_t *addr, uint16_t port,
              coap_packet_t *notification)
 {
   static coap_packet_t response[1];
@@ -199,7 +201,7 @@ simple_reply(coap_message_type_t type, uip_ip6addr_t *addr, uint16_t port,
 
   coap_init_message(response, type, NO_ERROR, notification->mid);
   len = coap_serialize_message(response, uip_appdata);
-  coap_send_message(addr, port, uip_appdata, len);
+  coap_send_message(ctx, addr, port, uip_appdata, len);
 }
 /*----------------------------------------------------------------------------*/
 static coap_notification_flag_t
@@ -252,11 +254,11 @@ coap_handle_notification(uip_ipaddr_t *addr, uint16_t port,
   if(NULL == obs) {
     PRINTF("Error while handling coap observe notification: "
            "no matching token found\n");
-    simple_reply(COAP_TYPE_RST, addr, port, notification);
+    simple_reply(COAP_TYPE_RST, obs->ctx, addr, port, notification);
     return;
   }
   if(notification->type == COAP_TYPE_CON) {
-    simple_reply(COAP_TYPE_ACK, addr, port, notification);
+    simple_reply(COAP_TYPE_ACK, obs->ctx, addr, port, notification);
   }
   if(obs->notification_callback != NULL) {
     flag = classify_notification(notification, 0);
@@ -321,21 +323,20 @@ coap_obs_request_registration(uip_ipaddr_t *addr, uint16_t port, char *uri,
   coap_set_header_observe(request, 0);
   token_len = coap_generate_token(&token);
   set_token(request, token, token_len);
-  t = coap_new_transaction(request->mid, addr, port);
-  if(t) {
-    obs = coap_obs_add_observee(addr, port, (uint8_t *)token, token_len, uri,
+  obs = coap_obs_add_observee(addr, port, (uint8_t *)token, token_len, uri,
                                 notification_callback, data);
-    if(obs) {
+  if(obs) {
+    if(t = coap_new_transaction(request->mid, obs->ctx, addr, port)){
       t->callback = handle_obs_registration_response;
       t->callback_data = obs;
       t->packet_len = coap_serialize_message(request, t->packet);
       coap_send_transaction(t);
     } else {
-      PRINTF("Could not allocate obs_subject resource buffer");
       coap_clear_transaction(t);
+      PRINTF("Could not allocate transaction buffer");
     }
   } else {
-    PRINTF("Could not allocate transaction buffer");
+    PRINTF("Could not allocate obs_subject resource buffer");
   }
   return obs;
 }

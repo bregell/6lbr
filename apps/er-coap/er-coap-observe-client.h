@@ -82,6 +82,7 @@ struct coap_observee_s {
   uip_ipaddr_t addr;
   uint16_t port;
   const char *url;
+  context_t *ctx;
   uint8_t token_len;
   uint8_t token[COAP_TOKEN_LEN];
   void *data;                   /* generic pointer for storing user data */
