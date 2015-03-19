@@ -326,7 +326,7 @@ coap_obs_request_registration(uip_ipaddr_t *addr, uint16_t port, char *uri,
   obs = coap_obs_add_observee(addr, port, (uint8_t *)token, token_len, uri,
                                 notification_callback, data);
   if(obs) {
-    if(t = coap_new_transaction(request->mid, obs->ctx, addr, port)){
+    if((t = coap_new_transaction(request->mid, obs->ctx, addr, port))){
       t->callback = handle_obs_registration_response;
       t->callback_data = obs;
       t->packet_len = coap_serialize_message(request, t->packet);

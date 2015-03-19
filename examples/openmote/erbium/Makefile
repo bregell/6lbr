@@ -1,4 +1,5 @@
 TARGET=openmote
+CFLAGS += -DOPENMOTE_OPENBATTERY=1
 CONTIKI_PROJECT = openbattery-er-server
 all: $(CONTIKI_PROJECT)
 
