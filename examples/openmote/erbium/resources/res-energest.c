@@ -45,7 +45,6 @@
 #include <stdlib.h>
 #include <string.h>
 #include "rest-engine.h"
-#include "dev/sht21.h"
 
 static void res_get_handler(void *request, void *response, uint8_t *buffer, uint16_t preferred_size, int32_t *offset);
 
@@ -55,31 +54,80 @@ static void res_get_handler(void *request, void *response, uint8_t *buffer, uint
  * preferred_size and offset, but must respect the REST_MAX_CHUNK_SIZE limit for the buffer.
  * If a smaller block size is requested for CoAP, the REST framework automatically splits the data.
  */
-RESOURCE(res_humidity,
-         "title=\"Humidity\";rt=\"humidity\"",
+RESOURCE(res_energest,
+         "title=\"Energy Info\";rt=\"energy\"",
          res_get_handler,
          NULL,
          NULL,
          NULL);
-
+         
 static void
 res_get_handler(void *request, void *response, uint8_t *buffer, uint16_t preferred_size, int32_t *offset)
 {
-  float res = 100;
-  uint16_t sht21_raw_humidity = humidity_sensor.value(SHT21_HUMIDITY_VAL);
-  float sht21_humidity = sht21_convert_humidity(sht21_raw_humidity);
-  int sht21_humidity_h = (int)sht21_humidity;
-  int sht21_humidity_d = (int)((sht21_humidity - (float)sht21_humidity_h)*res);
-  unsigned int accept = -1;
+  unsigned int accept = -1; 
+  
+  float cpu, lpm;
+  int cpu_f, lpm_f, cpu_d, lpm_d;
+  /*
+  static uint32_t last_cpu, last_lpm, last_transmit, last_listen;
+  static uint32_t last_idle_transmit, last_idle_listen;
+  */
+  
+  //uint32_t cpu, lpm, transmit, listen;
+  //uint32_t all_cpu, all_lpm, all_transmit, all_listen;
+  //uint32_t time, all_time, radio, all_radio;
+  uint32_t all_cpu, all_lpm, all_time;
+  
+  energest_flush();
 
+  all_cpu = energest_type_time(ENERGEST_TYPE_CPU);
+  all_lpm = energest_type_time(ENERGEST_TYPE_LPM);
+  //all_transmit = energest_type_time(ENERGEST_TYPE_TRANSMIT);
+  //all_listen = energest_type_time(ENERGEST_TYPE_LISTEN);
+
+  //cpu = all_cpu - last_cpu;
+  //lpm = all_lpm - last_lpm;
+  //transmit = all_transmit - last_transmit;
+  //listen = all_listen - last_listen;
+
+  /*
+  last_cpu = energest_type_time(ENERGEST_TYPE_CPU);
+  last_lpm = energest_type_time(ENERGEST_TYPE_LPM);
+  last_transmit = energest_type_time(ENERGEST_TYPE_TRANSMIT);
+  last_listen = energest_type_time(ENERGEST_TYPE_LISTEN);
+  */
+  
+  //radio = transmit + listen;
+  //time = cpu + lpm;
+  all_time = all_cpu + all_lpm;
+  //all_radio = energest_type_time(ENERGEST_TYPE_LISTEN) +
+  //  energest_type_time(ENERGEST_TYPE_TRANSMIT);
+  
+  cpu = ((float)all_cpu/(float)all_time)*100.0;
+  lpm = ((float)all_lpm/(float)all_time)*100.0;
+  cpu_f = (int)(cpu);
+  lpm_f = (int)(lpm);
+  cpu_d = (int)((cpu-(float)cpu_f)*100.0);
+  lpm_d = (int)((lpm-(float)lpm_f)*100.0);
+    
   REST.get_header_accept(request, &accept);
   if(accept == -1 || accept == REST.type.TEXT_PLAIN){
     REST.set_header_content_type(request, REST.type.TEXT_PLAIN);
-    snprintf((char *)buffer, REST_MAX_CHUNK_SIZE, "%d.%d%%", sht21_humidity_h, sht21_humidity_d);
+    snprintf(
+      (char *)buffer, REST_MAX_CHUNK_SIZE, 
+      "CPU:%d.%d%%, LPM:%d.%d%%", 
+      cpu_f, cpu_d,
+      lpm_f, lpm_d
+    );
     REST.set_response_payload(response, (uint8_t *)buffer, strlen((char *)buffer));
   } else if(accept == REST.type.APPLICATION_JSON){
     REST.set_header_content_type(request, REST.type.APPLICATION_JSON);
-    snprintf((char *)buffer, REST_MAX_CHUNK_SIZE, "{'humidity(%%)':%d.%d}", sht21_humidity_h, sht21_humidity_d);
+    snprintf(
+      (char *)buffer, REST_MAX_CHUNK_SIZE, 
+      "{\"CPU(%%)\":%d.%d, \"LPM(%%)\":%d.%d}", 
+      cpu_f, cpu_d,
+      lpm_f, lpm_d
+    );
     REST.set_response_payload(response, (uint8_t *)buffer, strlen((char *)buffer));
   } else {
     REST.set_response_status(response, REST.status.NOT_ACCEPTABLE);
@@ -91,4 +139,3 @@ res_get_handler(void *request, void *response, uint8_t *buffer, uint16_t preferr
  * @}
  * @}
  */
- 

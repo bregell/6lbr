@@ -81,7 +81,7 @@ res_get_handler(void *request, void *response, uint8_t *buffer, uint16_t preferr
     snprintf(
     (char *)buffer,
     REST_MAX_CHUNK_SIZE,
-    "%d",
+    "%d dBm",
     txpower
   );
     REST.set_response_payload(

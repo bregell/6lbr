@@ -37,15 +37,15 @@
  * @{
  * 
  * \file
- *      Humidity Resource Openmote
+ *      VDD3 Resource Openmote
  * \author
  *      Johan Bregell <johan@bregell.se>
  */
-
+ 
 #include <stdlib.h>
 #include <string.h>
 #include "rest-engine.h"
-#include "dev/sht21.h"
+#include "dev/cc2538-sensors.h"
 
 static void res_get_handler(void *request, void *response, uint8_t *buffer, uint16_t preferred_size, int32_t *offset);
 
@@ -55,8 +55,8 @@ static void res_get_handler(void *request, void *response, uint8_t *buffer, uint
  * preferred_size and offset, but must respect the REST_MAX_CHUNK_SIZE limit for the buffer.
  * If a smaller block size is requested for CoAP, the REST framework automatically splits the data.
  */
-RESOURCE(res_humidity,
-         "title=\"Humidity\";rt=\"humidity\"",
+RESOURCE(res_vdd3,
+         "title=\"Voltage\";rt=\"volt\"",
          res_get_handler,
          NULL,
          NULL,
@@ -65,21 +65,19 @@ RESOURCE(res_humidity,
 static void
 res_get_handler(void *request, void *response, uint8_t *buffer, uint16_t preferred_size, int32_t *offset)
 {
-  float res = 100;
-  uint16_t sht21_raw_humidity = humidity_sensor.value(SHT21_HUMIDITY_VAL);
-  float sht21_humidity = sht21_convert_humidity(sht21_raw_humidity);
-  int sht21_humidity_h = (int)sht21_humidity;
-  int sht21_humidity_d = (int)((sht21_humidity - (float)sht21_humidity_h)*res);
+  float voltage = 16384.0/(float)(vdd3_sensor.value(CC2538_SENSORS_VALUE_TYPE_RAW) >> 2);
+  int voltage_h = (int)voltage;
+  int voltage_d = (int)((voltage-(float)voltage_h)*100.0);
   unsigned int accept = -1;
 
   REST.get_header_accept(request, &accept);
   if(accept == -1 || accept == REST.type.TEXT_PLAIN){
     REST.set_header_content_type(request, REST.type.TEXT_PLAIN);
-    snprintf((char *)buffer, REST_MAX_CHUNK_SIZE, "%d.%d%%", sht21_humidity_h, sht21_humidity_d);
+    snprintf((char *)buffer, REST_MAX_CHUNK_SIZE, "%d.%dV", voltage_h, voltage_d);
     REST.set_response_payload(response, (uint8_t *)buffer, strlen((char *)buffer));
   } else if(accept == REST.type.APPLICATION_JSON){
     REST.set_header_content_type(request, REST.type.APPLICATION_JSON);
-    snprintf((char *)buffer, REST_MAX_CHUNK_SIZE, "{'humidity(%%)':%d.%d}", sht21_humidity_h, sht21_humidity_d);
+    snprintf((char *)buffer, REST_MAX_CHUNK_SIZE, "{'voltage(V)':%d.%d}", voltage_h, voltage_d);
     REST.set_response_payload(response, (uint8_t *)buffer, strlen((char *)buffer));
   } else {
     REST.set_response_status(response, REST.status.NOT_ACCEPTABLE);
@@ -91,4 +89,3 @@ res_get_handler(void *request, void *response, uint8_t *buffer, uint16_t preferr
  * @}
  * @}
  */
- 

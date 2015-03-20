@@ -101,6 +101,11 @@
 /* Enable client-side support for COAP observe */
 #define COAP_OBSERVE_CLIENT 1
 #endif /* __PROJECT_ERBIUM_CONF_H__ */
+
+/* Enable Energest */
+#undef ENERGEST_CONF_ON
+#define ENERGEST_CONF_ON  1
+
 /**
  * @}
  * @}
