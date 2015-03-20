@@ -1,4 +1,6 @@
 CC2538_ENC28J60_ARCH=gpio
 PROJECTDIRS += platform/openmote
 
+MODULES += core/net/mac/drowsie
+
 include platform/cc2538dk/Makefile.cc2538dk

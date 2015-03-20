@@ -30,12 +30,12 @@
  */
 
 /**
- * \addtogroup openmote-examples 
+ * \addtogroup openmote-examples
  * @{
- * 
+ *
  * \defgroup openmote-erbium-server Erbium server for the OpenMote OpenBattery platform
  * @{
- * 
+ *
  * \file
  *      OpenMote Erbium Server project configuration.
  * \author
@@ -63,7 +63,7 @@
 /* For projects, optimize memory and enable RDC and CSMA again. */
 
 #undef NETSTACK_CONF_RDC
-#define NETSTACK_CONF_RDC              nullrdc_driver
+#define NETSTACK_CONF_RDC              drowsie_driver
 
 /* Disabling TCP on CoAP nodes. */
 #undef UIP_CONF_TCP
@@ -105,4 +105,3 @@
  * @}
  * @}
  */
- 
