@@ -250,7 +250,7 @@ struct seqno {
 #endif /* NETSTACK_CONF_MAC_SEQNO_HISTORY */
 static struct seqno received_seqnos[MAX_SEQNOS];
 
-static struct ctimer drowsie_ctimer;
+static struct rtimer drowsie_rtimer;
 
 /*---------------------------------------------------------------------------*/
 static void
@@ -274,20 +274,20 @@ off(void)
   }
 }
 /*---------------------------------------------------------------------------*/
-static int powercycle(struct ctimer *c);
-static void call_powercycle(void *ptr)
+static int powercycle(struct rtimer *c);
+static void call_powercycle(struct rtimer *c, void *ptr)
 {
-  powercycle((struct ctimer *)ptr);
+  powercycle(c);
 }
 /*---------------------------------------------------------------------------*/
 static void
-schedule_powercycle(struct ctimer *c, clock_time_t time)
+schedule_powercycle(struct rtimer *c, rtimer_clock_t time)
 {
-  ctimer_set(c, time, call_powercycle, c);
+  rtimer_set(c, RTIMER_TIME(c) + time, 1, call_powercycle, NULL);
 }
 /*---------------------------------------------------------------------------*/
 static int
-powercycle(struct ctimer *c)
+powercycle(struct rtimer *c)
 {
   PT_BEGIN(&pt);
 
@@ -614,7 +614,7 @@ qsend_list(mac_callback_t sent, void *ptr, struct rdc_buf_list *buf_list)
    waited for a next packet for a too long time. Turns the radio off
    and leaves burst reception mode */
 static void
-recv_burst_off(void *ptr)
+recv_burst_off(struct rtimer *c, void *ptr)
 {
   off();
   we_are_receiving_burst = 0;
@@ -623,7 +623,7 @@ recv_burst_off(void *ptr)
 static void
 input_packet(void)
 {
-  static struct ctimer ct;
+  static struct rtimer ct;
 
   if(!we_are_receiving_burst) {
     off();
@@ -652,10 +652,11 @@ input_packet(void)
         on();
         /* Set a timer to turn the radio off in case we do not receive
        a next packet */
-        ctimer_set(&ct, INTER_PACKET_DEADLINE, recv_burst_off, NULL);
+
+        rtimer_set(&ct, RTIMER_TIME(&ct) + INTER_PACKET_DEADLINE, 1, recv_burst_off, NULL);
       } else {
         off();
-        ctimer_stop(&ct);
+        //rtimer_stop(&ct);
       }
 
       /* Check for duplicate packet by comparing the sequence number
@@ -697,7 +698,7 @@ turn_on(void)
   if(drowsie_is_on == 0) {
     drowsie_is_on = 1;
     drowsie_keep_radio_on = 0;
-    schedule_powercycle(&drowsie_ctimer, OFF_TIME);
+    schedule_powercycle(&drowsie_rtimer, OFF_TIME);
   }
   return 1;
 }
@@ -707,7 +708,7 @@ turn_off(int keep_radio_on)
 {
   drowsie_is_on = 0;
   drowsie_keep_radio_on = keep_radio_on;
-  ctimer_stop(&drowsie_ctimer);
+  //rtimer_stop(&drowsie_rtimer);
   if(keep_radio_on) {
     radio_is_on = 1;
     return NETSTACK_RADIO.on();
