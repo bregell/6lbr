@@ -106,6 +106,14 @@
 #undef ENERGEST_CONF_ON
 #define ENERGEST_CONF_ON  1
 
+/* Enable LPM 2 */
+#undef LPM_CONF_MAX_PM
+#define LPM_CONF_MAX_PM 2
+
+/* Silent Mode */
+#undef CC2538_CONF_QUIET
+#define CC2538_CONF_QUIET 1
+
 /**
  * @}
  * @}
