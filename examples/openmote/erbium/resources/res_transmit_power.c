@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013, Johan Bregell, i3tex AB
+ * Copyright (c) 2015, Johan Bregell, i3tex AB
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without

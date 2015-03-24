@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013, Johan Bregell, i3tex AB
+ * Copyright (c) 2015, Johan Bregell, i3tex AB
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -101,7 +101,7 @@ res_get_handler(void *request, void *response, uint8_t *buffer, uint16_t preferr
     fade(LEDS_GREEN);
   } else if(accept == REST.type.APPLICATION_JSON){
     REST.set_header_content_type(request, REST.type.APPLICATION_JSON);
-    snprintf((char *)buffer, REST_MAX_CHUNK_SIZE, "{'celcius':%d.%d}", sht21_temp_h, sht21_temp_d);
+    snprintf((char *)buffer, REST_MAX_CHUNK_SIZE, "{\"temp\":%d.%d, \"unit\":\"C\"}", sht21_temp_h, sht21_temp_d);
     REST.set_response_payload(response, (uint8_t *)buffer, strlen((char *)buffer));
     fade(LEDS_GREEN);
   } else {
