@@ -110,10 +110,10 @@
 #ifdef DROWSIE_CONF_ON_TIME
 #define ON_TIME                            (DROWSIE_CONF_ON_TIME)
 #else
-#define ON_TIME                            (CLOCK_SECOND / 128)
+#define ON_TIME                            (RTIMER_ARCH_SECOND / 128)
 #endif
 
-#define OFF_TIME ((CLOCK_SECOND / NETSTACK_RDC_CHANNEL_CHECK_RATE) - ON_TIME)
+#define OFF_TIME ((RTIMER_ARCH_SECOND / NETSTACK_RDC_CHANNEL_CHECK_RATE) - ON_TIME)
 
 /* CYCLE_TIME for channel cca checks, in rtimer ticks. */
 #define CYCLE_TIME (RTIMER_ARCH_SECOND / (NETSTACK_RDC_CHANNEL_CHECK_RATE))
@@ -283,7 +283,7 @@ static void call_powercycle(struct rtimer *c, void *ptr)
 static void
 schedule_powercycle(struct rtimer *c, rtimer_clock_t time)
 {
-  rtimer_set(c, RTIMER_TIME(c) + time, 1, call_powercycle, NULL);
+  rtimer_set(c, RTIMER_NOW() + time, 1, (void (*)(struct rtimer *, void *))call_powercycle, NULL);
 }
 /*---------------------------------------------------------------------------*/
 static int
@@ -653,7 +653,7 @@ input_packet(void)
         /* Set a timer to turn the radio off in case we do not receive
        a next packet */
 
-        rtimer_set(&ct, RTIMER_TIME(&ct) + INTER_PACKET_DEADLINE, 1, recv_burst_off, NULL);
+        rtimer_set(&ct, RTIMER_NOW() + INTER_PACKET_DEADLINE, 1, (void (*)(struct rtimer *, void *))recv_burst_off, NULL);
       } else {
         off();
         //rtimer_stop(&ct);
