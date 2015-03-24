@@ -3,4 +3,6 @@ PROJECTDIRS += platform/openmote
 
 MODULES += core/net/mac/drowsie
 
+SMALL = 0
+
 include platform/cc2538dk/Makefile.cc2538dk

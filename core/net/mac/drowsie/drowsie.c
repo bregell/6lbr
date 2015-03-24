@@ -94,13 +94,10 @@
 #ifndef RDC_CONF_HARDWARE_CSMA
 #define RDC_CONF_HARDWARE_CSMA       0
 #endif
+
 /* Radio returns TX_OK/TX_NOACK after autoack wait */
 #ifndef RDC_CONF_HARDWARE_ACK
-#define RDC_CONF_HARDWARE_ACK        0
-#endif
-/* MCU can sleep during radio off */
-#ifndef RDC_CONF_MCU_SLEEP
-#define RDC_CONF_MCU_SLEEP           0
+#define RDC_CONF_HARDWARE_ACK        0   
 #endif
 
 #ifndef DROWSIE_MAC_INPUT
@@ -334,7 +331,7 @@ send_packet(mac_callback_t mac_callback, void *mac_callback_ptr,
     PRINTDEBUG("drowsie: send broadcast\n");
 
   } else {
-#if UIP_CONF_IPV6
+#if NETSTACK_CONF_WITH_IPV6
     PRINTDEBUG("drowsie: send unicast to %02x%02x:%02x%02x:%02x%02x:%02x%02x\n",
                packetbuf_addr(PACKETBUF_ADDR_RECEIVER)->u8[0],
                packetbuf_addr(PACKETBUF_ADDR_RECEIVER)->u8[1],
@@ -344,11 +341,11 @@ send_packet(mac_callback_t mac_callback, void *mac_callback_ptr,
                packetbuf_addr(PACKETBUF_ADDR_RECEIVER)->u8[5],
                packetbuf_addr(PACKETBUF_ADDR_RECEIVER)->u8[6],
                packetbuf_addr(PACKETBUF_ADDR_RECEIVER)->u8[7]);
-#else /* UIP_CONF_IPV6 */
+#else /* NETSTACK_CONF_WITH_IPV6 */
     PRINTDEBUG("drowsie: send unicast to %u.%u\n",
                packetbuf_addr(PACKETBUF_ADDR_RECEIVER)->u8[0],
                packetbuf_addr(PACKETBUF_ADDR_RECEIVER)->u8[1]);
-#endif /* UIP_CONF_IPV6 */
+#endif /* NETSTACK_CONF_WITH_IPV6 */
   }
 
   if(!is_broadcast) {
@@ -614,7 +611,7 @@ qsend_list(mac_callback_t sent, void *ptr, struct rdc_buf_list *buf_list)
    waited for a next packet for a too long time. Turns the radio off
    and leaves burst reception mode */
 static void
-recv_burst_off(struct rtimer *c, void *ptr)
+recv_burst_off(void *ptr)
 {
   off();
   we_are_receiving_burst = 0;
@@ -623,7 +620,7 @@ recv_burst_off(struct rtimer *c, void *ptr)
 static void
 input_packet(void)
 {
-  static struct rtimer ct;
+  static struct ctimer ct;
 
   if(!we_are_receiving_burst) {
     off();
@@ -652,11 +649,10 @@ input_packet(void)
         on();
         /* Set a timer to turn the radio off in case we do not receive
        a next packet */
-
-        rtimer_set(&ct, RTIMER_NOW() + INTER_PACKET_DEADLINE, 1, (void (*)(struct rtimer *, void *))recv_burst_off, NULL);
+        ctimer_set(&ct, INTER_PACKET_DEADLINE, recv_burst_off, NULL);
       } else {
         off();
-        //rtimer_stop(&ct);
+        ctimer_stop(&ct);
       }
 
       /* Check for duplicate packet by comparing the sequence number
@@ -698,7 +694,7 @@ turn_on(void)
   if(drowsie_is_on == 0) {
     drowsie_is_on = 1;
     drowsie_keep_radio_on = 0;
-    schedule_powercycle(&drowsie_rtimer, OFF_TIME);
+    schedule_powercycle(&drowsie_rtimer, ON_TIME);
   }
   return 1;
 }
