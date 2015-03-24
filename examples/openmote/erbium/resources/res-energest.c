@@ -67,70 +67,77 @@ res_get_handler(void *request, void *response, uint8_t *buffer, uint16_t preferr
 {
   unsigned int accept = -1; 
   
-  float cpu, lpm;
-  int cpu_f, lpm_f, cpu_d, lpm_d;
-  /*
-  static uint32_t last_cpu, last_lpm, last_transmit, last_listen;
-  static uint32_t last_idle_transmit, last_idle_listen;
-  */
-  
-  //uint32_t cpu, lpm, transmit, listen;
-  //uint32_t all_cpu, all_lpm, all_transmit, all_listen;
-  //uint32_t time, all_time, radio, all_radio;
-  uint32_t all_cpu, all_lpm, all_time;
+  float cpu, lpm, rx, tx, lpm0, lpm1, lpm2;
+  int cpu_f, lpm_f, cpu_d, lpm_d, rx_f, rx_d, tx_f, tx_d, lpm0_f, lpm0_d, \
+    lpm1_f, lpm1_d, lpm2_f, lpm2_d;
+  uint32_t all_cpu, all_lpm, all_time, all_lpm0, all_lpm1, all_lpm2, all_rx, all_tx;
   
   energest_flush();
 
   all_cpu = energest_type_time(ENERGEST_TYPE_CPU);
   all_lpm = energest_type_time(ENERGEST_TYPE_LPM);
-  //all_transmit = energest_type_time(ENERGEST_TYPE_TRANSMIT);
-  //all_listen = energest_type_time(ENERGEST_TYPE_LISTEN);
-
-  //cpu = all_cpu - last_cpu;
-  //lpm = all_lpm - last_lpm;
-  //transmit = all_transmit - last_transmit;
-  //listen = all_listen - last_listen;
-
-  /*
-  last_cpu = energest_type_time(ENERGEST_TYPE_CPU);
-  last_lpm = energest_type_time(ENERGEST_TYPE_LPM);
-  last_transmit = energest_type_time(ENERGEST_TYPE_TRANSMIT);
-  last_listen = energest_type_time(ENERGEST_TYPE_LISTEN);
-  */
-  
-  //radio = transmit + listen;
-  //time = cpu + lpm;
+  all_rx = energest_type_time(ENERGEST_TYPE_LISTEN);
+  all_tx = energest_type_time(ENERGEST_TYPE_TRANSMIT);
+  all_lpm0 = LPM_STATS_GET(0);
+  all_lpm1 = LPM_STATS_GET(1);
+  all_lpm2 = LPM_STATS_GET(2);
   all_time = all_cpu + all_lpm;
-  //all_radio = energest_type_time(ENERGEST_TYPE_LISTEN) +
-  //  energest_type_time(ENERGEST_TYPE_TRANSMIT);
   
   cpu = ((float)all_cpu/(float)all_time)*100.0;
-  lpm = ((float)all_lpm/(float)all_time)*100.0;
   cpu_f = (int)(cpu);
-  lpm_f = (int)(lpm);
   cpu_d = (int)((cpu-(float)cpu_f)*100.0);
+  
+  rx = ((float)all_rx/(float)all_time)*100.0;
+  rx_f = (int)rx;
+  rx_d = (int)((rx-(float)rx_f)*100);
+  
+  tx = ((float)all_tx/(float)all_time)*100.0;
+  tx_f =(int)tx;
+  tx_d = (int)((tx-(float)tx_f)*100);
+  
+  lpm = ((float)all_lpm/(float)all_time)*100.0;
+  lpm_f = (int)(lpm);
   lpm_d = (int)((lpm-(float)lpm_f)*100.0);
+  
+  lpm0 = ((float)all_lpm0/(float)all_lpm)*100.0;
+  lpm0_f = (int)lpm0;
+  lpm0_d = (int)((lpm0-(float)lpm0_f)*100);
+  
+  lpm1 = ((float)all_lpm1/(float)all_lpm)*100.0;
+  lpm1_f = (int)lpm1;
+  lpm1_d = (int)((lpm1-(float)lpm1_f)*100);
+  
+  lpm2 = ((float)all_lpm2/(float)all_lpm)*100.0;    
+  lpm2_f = (int)lpm2;
+  lpm2_d = (int)((lpm2-(float)lpm2_f)*100);
     
   REST.get_header_accept(request, &accept);
   if(accept == -1 || accept == REST.type.TEXT_PLAIN){
     REST.set_header_content_type(request, REST.type.TEXT_PLAIN);
     snprintf(
       (char *)buffer, REST_MAX_CHUNK_SIZE, 
-      "CPU:%d.%d%%, LPM:%d.%d%%, PM0:%u, PM1:%u, PM2:%u", 
+      "CPU:%d.%d%% (RX:%d.%d%%, TX:%d.%d%%) , LPM:%d.%d%% (PM0:%d.%d%%, PM1:%d.%d%%, PM2:%d.%d%%)", 
       cpu_f, cpu_d,
+      rx_f, rx_d,
+      tx_f, tx_d,
       lpm_f, lpm_d, 
-      (int)LPM_STATS_GET(0),
-      (int)LPM_STATS_GET(1), 
-      (int)LPM_STATS_GET(2)
+      lpm0_f, lpm0_d,
+      lpm1_f, lpm1_d,
+      lpm2_f, lpm2_d
     );
     REST.set_response_payload(response, (uint8_t *)buffer, strlen((char *)buffer));
   } else if(accept == REST.type.APPLICATION_JSON){
     REST.set_header_content_type(request, REST.type.APPLICATION_JSON);
     snprintf(
-      (char *)buffer, REST_MAX_CHUNK_SIZE, 
-      "{\"CPU(%%)\":%d.%d, \"LPM(%%)\":%d.%d}", 
+      (char *)buffer, REST_MAX_CHUNK_SIZE,
+      "{\"CPU\": {\"Total\":%d.%d, \"RX\":%d.%d, \"TX\":%d.%d}, \"LPM\": {\"Total\":%d.%d, \"PM0\":%d.%d, \"PM1\":%d.%d, \"PM2\":%d.%d}, \"Unit\":\"%%\"}",
       cpu_f, cpu_d,
-      lpm_f, lpm_d
+      rx_f, rx_d,
+      tx_f, tx_d,
+      lpm_f, lpm_d, 
+      lpm0_f, lpm0_d,
+      lpm1_f, lpm1_d,
+      lpm2_f, lpm2_d
     );
     REST.set_response_payload(response, (uint8_t *)buffer, strlen((char *)buffer));
   } else {

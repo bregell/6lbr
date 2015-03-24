@@ -37,19 +37,23 @@
  * @{
  * 
  * \file
- *      Light Resource Openmote
+ *      Resource to test the bandwidth and troughput of CoAP
  * \author
  *      Johan Bregell <johan@bregell.se>
  */
 
 #include <stdlib.h>
 #include <string.h>
-#include "dev/i2c.h"
-#include "dev/leds.h"
 #include "rest-engine.h"
-#include "dev/max44009.h"
+#include "er-coap.h"
+
+#define BUFFER_SIZE 256
+
+static volatile uint8_t buffer[BUFFER_SIZE] = { 0 };
+static volatile uint32_t head = 0, tail = 0;
 
 static void res_get_handler(void *request, void *response, uint8_t *buffer, uint16_t preferred_size, int32_t *offset);
+static void res_put_handler(void *request, void *response, uint8_t *buffer, uint16_t preferred_size, int32_t *offset);
 
 /*
  * A handler function named [resource name]_handler must be implemented for each RESOURCE.
@@ -57,41 +61,51 @@ static void res_get_handler(void *request, void *response, uint8_t *buffer, uint
  * preferred_size and offset, but must respect the REST_MAX_CHUNK_SIZE limit for the buffer.
  * If a smaller block size is requested for CoAP, the REST framework automatically splits the data.
  */
-RESOURCE(res_light,
-         "title=\"Light\";rt=\"light\"",
+RESOURCE(res_buffer,
+         "title=\"Circular Buffer\"",
          res_get_handler,
          NULL,
-         NULL,
+         res_put_handler,
          NULL);
 
 static void
 res_get_handler(void *request, void *response, uint8_t *buffer, uint16_t preferred_size, int32_t *offset)
 {
-  i2c_init(I2C_SDA_PORT, I2C_SDA_PIN, I2C_SCL_PORT, I2C_SCL_PIN, I2C_SCL_FAST_BUS_SPEED);
-  static float res = 100;
-  uint16_t max44009_raw_light = light_sensor.value(MAX44009_LIGHT_VAL);
-  float max44009_light = max44009_convert_light(max44009_raw_light);
-  int max44009_light_h = (int)max44009_light;
-  int max44009_light_d = (int)((max44009_light - (float)max44009_light_h)*res);
-  unsigned int accept = -1;
+  coap_packet_t *const coap_req = (coap_packet_t *)request;
+  coap_packet_t *const coap_res = (coap_packet_t *)response;
   
-
-  REST.get_header_accept(request, &accept);
-  if(accept == -1 || accept == REST.type.TEXT_PLAIN){
+  if(coap_req->content_format == REST.type.TEXT_PLAIN){
     REST.set_header_content_type(request, REST.type.TEXT_PLAIN);
-    snprintf((char *)buffer, REST_MAX_CHUNK_SIZE, "%d.%d lux", max44009_light_h, max44009_light_d);
-    REST.set_response_payload(response, (uint8_t *)buffer, strlen((char *)buffer));
-  } else if(accept == REST.type.APPLICATION_JSON){
-    REST.set_header_content_type(request, REST.type.APPLICATION_JSON);
-    snprintf((char *)buffer, REST_MAX_CHUNK_SIZE, "{\"light\":%d.%d, \"unit\":\"lux\"}", max44009_light_h, max44009_light_d);
-    REST.set_response_payload(response, (uint8_t *)buffer, strlen((char *)buffer));
-  } else {
-    REST.set_response_status(response, REST.status.NOT_ACCEPTABLE);
-    const char *msg = "Supporting content-types text/plain and application/json";
-    REST.set_response_payload(response, msg, strlen(msg));
+    
+    volatile int i = 0;
+    volatile int ptr = tail;
+    while(ptr != head && i < REST_MAX_CHUNK_SIZE){
+      coap_res->payload[i] = buffer[ptr];
+      ptr = (ptr+1)%BUFFER_SIZE;
+      i++;
+    }
+  }
+}
+
+static void
+res_put_handler(void *request, void *response, uint8_t *buffer, uint16_t preferred_size, int32_t *offset)
+{
+  coap_packet_t *const coap_req = (coap_packet_t *)request;
+  
+  if(coap_req->content_format == REST.type.TEXT_PLAIN){
+    volatile int i = 0;
+    tail = head;
+    while(i < coap_req->payload_len){
+      buffer[head] = coap_req->payload[i];
+      head = (head+1)%BUFFER_SIZE;
+      i++;
+    }
+    buffer[head] = '\0';
+    REST.set_response_status(response, REST.status.CHANGED);
   }
 }
 /**
  * @}
  * @}
  */
+ 

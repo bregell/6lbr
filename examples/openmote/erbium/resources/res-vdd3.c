@@ -77,7 +77,7 @@ res_get_handler(void *request, void *response, uint8_t *buffer, uint16_t preferr
     REST.set_response_payload(response, (uint8_t *)buffer, strlen((char *)buffer));
   } else if(accept == REST.type.APPLICATION_JSON){
     REST.set_header_content_type(request, REST.type.APPLICATION_JSON);
-    snprintf((char *)buffer, REST_MAX_CHUNK_SIZE, "{'voltage(V)':%d.%d}", voltage_h, voltage_d);
+    snprintf((char *)buffer, REST_MAX_CHUNK_SIZE, "{'voltage':%d.%d, \"unit\":\"V\"}", voltage_h, voltage_d);
     REST.set_response_payload(response, (uint8_t *)buffer, strlen((char *)buffer));
   } else {
     REST.set_response_status(response, REST.status.NOT_ACCEPTABLE);

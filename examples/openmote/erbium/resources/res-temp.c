@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013, Johan Bregell, i3tex AB
+ * Copyright (c) 2015, Johan Bregell, i3tex AB
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -44,6 +44,7 @@
 
 #include <stdlib.h>
 #include <string.h>
+#include "dev/i2c.h"
 #include "dev/leds.h"
 #include "rest-engine.h"
 #include "dev/sht21.h"
@@ -84,11 +85,12 @@ RESOURCE(res_temp,
 static void
 res_get_handler(void *request, void *response, uint8_t *buffer, uint16_t preferred_size, int32_t *offset)
 {
-  float res = 100;
-  uint16_t sht21_raw_temp = temp_sensor.value(SHT21_TEMP_VAL);
-  float sht21_temp = sht21_convert_temperature(sht21_raw_temp);
-  int sht21_temp_h = (int)sht21_temp;
-  int sht21_temp_d = (int)((sht21_temp - (float)sht21_temp_h)*res);
+  i2c_init(I2C_SDA_PORT, I2C_SDA_PIN, I2C_SCL_PORT, I2C_SCL_PIN, I2C_SCL_FAST_BUS_SPEED);
+  static float res = 100;
+  volatile uint16_t sht21_raw_temp = temp_sensor.value(SHT21_TEMP_VAL);
+  volatile float sht21_temp = sht21_convert_temperature(sht21_raw_temp);
+  volatile int sht21_temp_h = (int)sht21_temp;
+  volatile int sht21_temp_d = (int)((sht21_temp - (float)sht21_temp_h)*res);
   unsigned int accept = -1;
 
   REST.get_header_accept(request, &accept);
@@ -99,7 +101,7 @@ res_get_handler(void *request, void *response, uint8_t *buffer, uint16_t preferr
     fade(LEDS_GREEN);
   } else if(accept == REST.type.APPLICATION_JSON){
     REST.set_header_content_type(request, REST.type.APPLICATION_JSON);
-    snprintf((char *)buffer, REST_MAX_CHUNK_SIZE, "{'celcius':%d.%d}", sht21_temp_h, sht21_temp_d);
+    snprintf((char *)buffer, REST_MAX_CHUNK_SIZE, "{\"temp\":%d.%d, \"unit\":\"C\"}", sht21_temp_h, sht21_temp_d);
     REST.set_response_payload(response, (uint8_t *)buffer, strlen((char *)buffer));
     fade(LEDS_GREEN);
   } else {

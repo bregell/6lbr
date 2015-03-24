@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013, Johan Bregell, i3tex AB
+ * Copyright (c) 2015, Johan Bregell, i3tex AB
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -66,7 +66,7 @@
  * The build system automatically compiles the resources in the corresponding sub-directory.
  */
 extern resource_t
-  res_hello,
+  //res_hello,
   res_temp, 
   res_humidity, 
   res_light, 
@@ -105,13 +105,13 @@ PROCESS_THREAD(er_example_server, ev, data)
    * WARNING: Activating twice only means alternate path, not two instances!
    * All static variables are the same for each URI path.
    */
-  rest_activate_resource(&res_hello, "test/hello");
+  //rest_activate_resource(&res_hello, "test/hello");
   rest_activate_resource(&res_temp, "sensors/temp");
   rest_activate_resource(&res_humidity, "sensors/humididty");
   rest_activate_resource(&res_light, "sensors/light");
   //rest_activate_resource(&res_accelerometer, "sensors/accelerometer");
   rest_activate_resource(&res_vdd3, "sensors/vdd3");
-  rest_activate_resource(&res_transmit_power, "txpower");
+  rest_activate_resource(&res_transmit_power, "info/txpower");
   rest_activate_resource(&res_energest, "info/energy");
 
 
