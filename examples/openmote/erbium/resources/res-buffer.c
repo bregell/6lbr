@@ -71,19 +71,19 @@ RESOURCE(res_buffer,
 static void
 res_get_handler(void *request, void *response, uint8_t *buffer, uint16_t preferred_size, int32_t *offset)
 {
+  uint8_t buff[REST_MAX_CHUNK_SIZE] = { 0 };
   coap_packet_t *const coap_req = (coap_packet_t *)request;
-  coap_packet_t *const coap_res = (coap_packet_t *)response;
   
   if(coap_req->content_format == REST.type.TEXT_PLAIN){
-    REST.set_header_content_type(request, REST.type.TEXT_PLAIN);
-    
+    REST.set_header_content_type(response, REST.type.TEXT_PLAIN);
     volatile int i = 0;
     volatile int ptr = tail;
     while(ptr != head && i < REST_MAX_CHUNK_SIZE){
-      coap_res->payload[i] = buffer[ptr];
+      buff[i] = buffer[ptr];
       ptr = (ptr+1)%BUFFER_SIZE;
       i++;
     }
+    REST.set_response_payload(response, buff, i);
   }
 }
 

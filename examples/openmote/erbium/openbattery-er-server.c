@@ -72,7 +72,8 @@ extern resource_t
   res_light, 
   res_transmit_power,
   res_vdd3,
-  res_energest;
+  res_energest, 
+  res_buffer;
 
 PROCESS(er_example_server, "Erbium Example Server");
 AUTOSTART_PROCESSES(&er_example_server);
@@ -113,6 +114,7 @@ PROCESS_THREAD(er_example_server, ev, data)
   rest_activate_resource(&res_vdd3, "sensors/vdd3");
   rest_activate_resource(&res_transmit_power, "info/txpower");
   rest_activate_resource(&res_energest, "info/energy");
+  rest_activate_resource(&res_buffer, "data/buffer");
 
 
 
