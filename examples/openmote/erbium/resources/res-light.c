@@ -44,6 +44,7 @@
 
 #include <stdlib.h>
 #include <string.h>
+#include "dev/i2c.h"
 #include "dev/leds.h"
 #include "rest-engine.h"
 #include "dev/max44009.h"
@@ -66,12 +67,14 @@ RESOURCE(res_light,
 static void
 res_get_handler(void *request, void *response, uint8_t *buffer, uint16_t preferred_size, int32_t *offset)
 {
-  float res = 100;
+  i2c_init(I2C_SDA_PORT, I2C_SDA_PIN, I2C_SCL_PORT, I2C_SCL_PIN, I2C_SCL_FAST_BUS_SPEED);
+  static float res = 100;
   uint16_t max44009_raw_light = light_sensor.value(MAX44009_LIGHT_VAL);
   float max44009_light = max44009_convert_light(max44009_raw_light);
   int max44009_light_h = (int)max44009_light;
   int max44009_light_d = (int)((max44009_light - (float)max44009_light_h)*res);
   unsigned int accept = -1;
+  
 
   REST.get_header_accept(request, &accept);
   if(accept == -1 || accept == REST.type.TEXT_PLAIN){

@@ -44,6 +44,7 @@
 
 #include <stdlib.h>
 #include <string.h>
+#include "dev/i2c.h"
 #include "rest-engine.h"
 #include "dev/sht21.h"
 
@@ -65,11 +66,12 @@ RESOURCE(res_humidity,
 static void
 res_get_handler(void *request, void *response, uint8_t *buffer, uint16_t preferred_size, int32_t *offset)
 {
-  float res = 100;
-  uint16_t sht21_raw_humidity = humidity_sensor.value(SHT21_HUMIDITY_VAL);
-  float sht21_humidity = sht21_convert_humidity(sht21_raw_humidity);
-  int sht21_humidity_h = (int)sht21_humidity;
-  int sht21_humidity_d = (int)((sht21_humidity - (float)sht21_humidity_h)*res);
+  i2c_init(I2C_SDA_PORT, I2C_SDA_PIN, I2C_SCL_PORT, I2C_SCL_PIN, I2C_SCL_FAST_BUS_SPEED);
+  static float res = 100;
+  volatile uint16_t sht21_raw_humidity = humidity_sensor.value(SHT21_HUMIDITY_VAL);
+  volatile float sht21_humidity = sht21_convert_humidity(sht21_raw_humidity);
+  volatile int sht21_humidity_h = (int)sht21_humidity;
+  volatile int sht21_humidity_d = (int)((sht21_humidity - (float)sht21_humidity_h)*res);
   unsigned int accept = -1;
 
   REST.get_header_accept(request, &accept);
