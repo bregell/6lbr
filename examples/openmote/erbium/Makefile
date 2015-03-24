@@ -15,7 +15,7 @@ PROJECTDIRS += $(REST_RESOURCES_DIR)
 PROJECT_SOURCEFILES += $(REST_RESOURCES_FILES)
 
 # linker optimizations
-SMALL=1
+SMALL=0
 
 # REST Engine shall use Erbium CoAP implementation
 APPS += er-coap

@@ -104,11 +104,14 @@
 
 /* Enable Energest */
 #undef ENERGEST_CONF_ON
-#define ENERGEST_CONF_ON  1
+#define ENERGEST_CONF_ON    1
 
-/* Enable LPM 2 */
+/* Set LPM level to 2 */
 #undef LPM_CONF_MAX_PM
-#define LPM_CONF_MAX_PM 2
+#define LPM_CONF_MAX_PM     2
+
+#undef LPM_CONF_STATS
+#define LPM_CONF_STATS 1
 
 /* Silent Mode */
 #undef CC2538_CONF_QUIET

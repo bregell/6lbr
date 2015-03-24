@@ -44,6 +44,7 @@
 
 #include <stdlib.h>
 #include <string.h>
+#include "lpm.h"
 #include "rest-engine.h"
 
 static void res_get_handler(void *request, void *response, uint8_t *buffer, uint16_t preferred_size, int32_t *offset);
@@ -115,9 +116,12 @@ res_get_handler(void *request, void *response, uint8_t *buffer, uint16_t preferr
     REST.set_header_content_type(request, REST.type.TEXT_PLAIN);
     snprintf(
       (char *)buffer, REST_MAX_CHUNK_SIZE, 
-      "CPU:%d.%d%%, LPM:%d.%d%%", 
+      "CPU:%d.%d%%, LPM:%d.%d%%, PM0:%u, PM1:%u, PM2:%u", 
       cpu_f, cpu_d,
-      lpm_f, lpm_d
+      lpm_f, lpm_d, 
+      (int)LPM_STATS_GET(0),
+      (int)LPM_STATS_GET(1), 
+      (int)LPM_STATS_GET(2)
     );
     REST.set_response_payload(response, (uint8_t *)buffer, strlen((char *)buffer));
   } else if(accept == REST.type.APPLICATION_JSON){
