@@ -23,6 +23,7 @@ APPS += rest-engine
 
 #Add Drowsie
 MODULES += core/net/mac/drowsie
+MODULES += core/net/mac/cxmac
 
 CONTIKI_WITH_IPV6 = 1
 include $(CONTIKI)/Makefile.include

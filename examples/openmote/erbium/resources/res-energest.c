@@ -115,7 +115,7 @@ res_get_handler(void *request, void *response, uint8_t *buffer, uint16_t preferr
   if(accept == -1 || accept == REST.type.TEXT_PLAIN){
     REST.set_header_content_type(request, REST.type.TEXT_PLAIN);
     snprintf(
-      (char *)buffer, REST_MAX_CHUNK_SIZE, 
+      (char *)buffer, REST_MAX_CHUNK_SIZE,
       "CPU:%d.%d%% (RX:%d.%d%%, TX:%d.%d%%) , LPM:%d.%d%% (PM0:%d.%d%%, PM1:%d.%d%%, PM2:%d.%d%%)", 
       cpu_f, cpu_d,
       rx_f, rx_d,

@@ -262,18 +262,30 @@ powercycle_turn_radio_on(void)
 }
 /*---------------------------------------------------------------------------*/
 static struct ctimer cpowercycle_ctimer;
-#define CSCHEDULE_POWERCYCLE(rtime) cschedule_powercycle((1ul * CLOCK_SECOND * (rtime)) / RTIMER_ARCH_SECOND)
+static struct rtimer cpowercycle_rtimer;
+//#define CSCHEDULE_POWERCYCLE(rtime) cschedule_powercycle((1ul * CLOCK_SECOND * (rtime)) / RTIMER_ARCH_SECOND)
+#define CSCHEDULE_POWERCYCLE(rtime, m) cschedule_powercycle(rtime, m)
 static char cpowercycle(void *ptr);
-static void
-cschedule_powercycle(clock_time_t time)
+static void call_powercycle(struct rtimer *r, void *ptr)
 {
-
+  cpowercycle((void *)r);
+}
+static void
+//cschedule_powercycle(clock_time_t time)
+cschedule_powercycle(rtimer_clock_t time, m)
+{
+  
   if(cxmac_is_on) {
     if(time == 0) {
       time = 1;
     }
-    ctimer_set(&cpowercycle_ctimer, time,
+    if(m == 0){
+      ctimer_set(&cpowercycle_ctimer, time,
                (void (*)(void *))cpowercycle, NULL);
+    } else if (m == 1 {
+      rtimer_set(&cpowercycle_rtimer, RTIMER_NOW()+time, 1,
+              (void (*)(struct rtimer *, void *))call_powercycle, NULL);
+    }
   }
 }
 /*---------------------------------------------------------------------------*/
