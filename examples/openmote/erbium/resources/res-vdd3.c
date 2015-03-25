@@ -65,19 +65,17 @@ RESOURCE(res_vdd3,
 static void
 res_get_handler(void *request, void *response, uint8_t *buffer, uint16_t preferred_size, int32_t *offset)
 {
-  float voltage = 16384.0/(float)(vdd3_sensor.value(CC2538_SENSORS_VALUE_TYPE_RAW) >> 2);
-  int voltage_h = (int)voltage;
-  int voltage_d = (int)((voltage-(float)voltage_h)*100.0);
+  int voltage = vdd3_sensor.value(CC2538_SENSORS_VALUE_TYPE_CONVERTED);
   unsigned int accept = -1;
 
   REST.get_header_accept(request, &accept);
   if(accept == -1 || accept == REST.type.TEXT_PLAIN){
     REST.set_header_content_type(request, REST.type.TEXT_PLAIN);
-    snprintf((char *)buffer, REST_MAX_CHUNK_SIZE, "%d.%dV", voltage_h, voltage_d);
+    snprintf((char *)buffer, REST_MAX_CHUNK_SIZE, "%dmV", voltage);
     REST.set_response_payload(response, (uint8_t *)buffer, strlen((char *)buffer));
   } else if(accept == REST.type.APPLICATION_JSON){
     REST.set_header_content_type(request, REST.type.APPLICATION_JSON);
-    snprintf((char *)buffer, REST_MAX_CHUNK_SIZE, "{'voltage':%d.%d, \"unit\":\"V\"}", voltage_h, voltage_d);
+    snprintf((char *)buffer, REST_MAX_CHUNK_SIZE, "{'voltage':%d, \"unit\":\"mV\"}", voltage);
     REST.set_response_payload(response, (uint8_t *)buffer, strlen((char *)buffer));
   } else {
     REST.set_response_status(response, REST.status.NOT_ACCEPTABLE);
