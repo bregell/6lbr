@@ -103,6 +103,49 @@ all_red-io:
 all_cc2538dk:
 	@echo "Target is deprecated, use 'make TARGET=cc2538dk all' instead"
 
+PKG_VERSION=0
+VERSION=$(shell echo $(word 3,$(shell awk '/CETIC_6LBR_VERSION/' project-conf.h)))
+
+DEB=6lbr-$(VERSION)-$(PKG_VERSION)-deb
+IPK=6lbr-$(VERSION)-$(PKG_VERSION)-ipk
+
+install:
+	install -d /etc/6lbr
+	cp -r package/etc/6lbr /etc
+	install -d /etc/init.d
+	install package/etc/init.d/* /etc/init.d
+	install -d /usr/bin
+	install package/usr/bin/* /usr/bin
+	install -d /usr/lib/6lbr
+	cp -r package/usr/lib/6lbr /usr/lib
+	install -d /usr/lib/6lbr/bin
+	install bin/* /usr/lib/6lbr/bin
+ifneq ($(PLUGINS_FILES),)
+	install $(PLUGINS_FILES) /usr/lib/6lbr/plugins
+endif
+	install tools/nvm_tool /usr/lib/6lbr/bin
+
+ipk:
+	rm -rf $(IPK)
+	rm -f $(IPK).ipk
+	cp -R package $(IPK)
+	mkdir -p $(IPK)/usr/lib/6lbr/bin
+	cp bin/* $(IPK)/usr/lib/6lbr/bin
+ifneq ($(PLUGINS_FILES),)
+	cp $(PLUGINS_FILES) $(IPK)/usr/lib/6lbr/plugins
+endif
+	cp tools/nvm_tool $(IPK)/usr/lib/6lbr/bin
+	cd $(IPK) && tar zcvf ../$(IPK)/data.tar.gz --exclude='*~' *
+	cd angstrom && tar zcvfh ../$(IPK)/control.tar.gz --exclude='*~' *
+	echo 2.0 > $(IPK)/debian-binary
+	cd $(IPK) && ar rc ../cetic-6lbr_$(VERSION)-$(PKG_VERSION)_armv7a.ipk debian-binary data.tar.gz control.tar.gz
+
+tools:
+	cd tools && $(MAKE)
+
+6lbr-demo:
+	pushd test; ../package/usr/bin/6lbr conf-templates/cooja-1-router.conf; popd
+
 include $(CONTIKI)/Makefile.include
 
 .PHONY: all tools 6lbr-demo
