@@ -89,7 +89,7 @@
 #define LOG6LBR_STATIC              1
 
 #undef NETSTACK_CONF_RDC
-#define NETSTACK_CONF_RDC     cxmac_driver
+#define NETSTACK_CONF_RDC     contikimac_driver
 
 #define CETIC_NODE_CONFIG           0
 
