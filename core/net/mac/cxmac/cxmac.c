@@ -163,7 +163,7 @@ static volatile unsigned char radio_is_on = 0;
 #define LEDS_ON(x) leds_on(x)
 #define LEDS_OFF(x) leds_off(x)
 #define LEDS_TOGGLE(x) leds_toggle(x)
-#define DEBUG 0
+#define DEBUG 1
 #if DEBUG
 #include <stdio.h>
 #define PRINTF(...) printf(__VA_ARGS__)
@@ -265,26 +265,28 @@ static struct ctimer cpowercycle_ctimer;
 static struct rtimer cpowercycle_rtimer;
 //#define CSCHEDULE_POWERCYCLE(rtime) cschedule_powercycle((1ul * CLOCK_SECOND * (rtime)) / RTIMER_ARCH_SECOND)
 #define CSCHEDULE_POWERCYCLE(rtime, m) cschedule_powercycle(rtime, m)
+#define CTIMER 0
+#define RTIMER 1
 static char cpowercycle(void *ptr);
-static void call_powercycle(struct rtimer *r, void *ptr)
+/*static void call_powercycle(struct rtimer *r, void *ptr)
 {
   cpowercycle((void *)r);
-}
+}*/
 static void
 //cschedule_powercycle(clock_time_t time)
-cschedule_powercycle(rtimer_clock_t time, m)
+cschedule_powercycle(rtimer_clock_t time, int m)
 {
   
   if(cxmac_is_on) {
     if(time == 0) {
       time = 1;
     }
-    if(m == 0){
-      ctimer_set(&cpowercycle_ctimer, time,
+    if(m == CTIMER){
+      ctimer_set(&cpowercycle_ctimer, (1ul * CLOCK_SECOND * (time)) / RTIMER_ARCH_SECOND,
                (void (*)(void *))cpowercycle, NULL);
-    } else if (m == 1 {
+    } else if (m == RTIMER) {
       rtimer_set(&cpowercycle_rtimer, RTIMER_NOW()+time, 1,
-              (void (*)(struct rtimer *, void *))call_powercycle, NULL);
+              (void (*)(struct rtimer *, void *))cpowercycle, NULL);
     }
   }
 }
@@ -310,7 +312,7 @@ cpowercycle(void *ptr)
 
     /* If there were a strobe in the air, turn radio on */
     powercycle_turn_radio_on();
-    CSCHEDULE_POWERCYCLE(DEFAULT_ON_TIME);
+    CSCHEDULE_POWERCYCLE(DEFAULT_ON_TIME, RTIMER);
     PT_YIELD(&pt);
 
     if(cxmac_config.off_time > 0) {
@@ -325,7 +327,7 @@ cpowercycle(void *ptr)
 	  powercycle_turn_radio_off();
 	}
       }
-      CSCHEDULE_POWERCYCLE(DEFAULT_OFF_TIME);
+      CSCHEDULE_POWERCYCLE(DEFAULT_OFF_TIME, RTIMER);
       PT_YIELD(&pt);
     }
   }
@@ -907,7 +909,7 @@ cxmac_init(void)
 	     cycle_announcement, NULL);
 #endif /* CXMAC_CONF_ANNOUNCEMENTS */
 
-  CSCHEDULE_POWERCYCLE(DEFAULT_OFF_TIME);
+  CSCHEDULE_POWERCYCLE(DEFAULT_OFF_TIME, RTIMER);
 }
 /*---------------------------------------------------------------------------*/
 static int
@@ -916,7 +918,7 @@ turn_on(void)
   cxmac_is_on = 1;
   /*  rtimer_set(&rt, RTIMER_NOW() + cxmac_config.off_time, 1,
       (void (*)(struct rtimer *, void *))powercycle, NULL);*/
-  CSCHEDULE_POWERCYCLE(DEFAULT_OFF_TIME);
+  CSCHEDULE_POWERCYCLE(DEFAULT_OFF_TIME, RTIMER);
   return 1;
 }
 /*---------------------------------------------------------------------------*/
