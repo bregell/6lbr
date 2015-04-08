@@ -37,23 +37,18 @@
  * @{
  * 
  * \file
- *      Resource to test the bandwidth and troughput of CoAP
+ *      CX-MAC Neighbour List
  * \author
- *      Johan Bregell <johan@bregell.se>
+ *      Johan Bregell <johan_bregell@hotmail.com>
  */
+#ifdef CXMAC 
 
 #include <stdlib.h>
 #include <string.h>
 #include "rest-engine.h"
-#include "er-coap.h"
-
-#define BUFFER_SIZE 256
-
-static uint8_t message_buffer[BUFFER_SIZE] = { 0 };
-static uint32_t head = 0, tail = 0;
+#include "cxmac.c"
 
 static void res_get_handler(void *request, void *response, uint8_t *buffer, uint16_t preferred_size, int32_t *offset);
-static void res_put_handler(void *request, void *response, uint8_t *buffer, uint16_t preferred_size, int32_t *offset);
 
 /*
  * A handler function named [resource name]_handler must be implemented for each RESOURCE.
@@ -61,57 +56,37 @@ static void res_put_handler(void *request, void *response, uint8_t *buffer, uint
  * preferred_size and offset, but must respect the REST_MAX_CHUNK_SIZE limit for the buffer.
  * If a smaller block size is requested for CoAP, the REST framework automatically splits the data.
  */
-RESOURCE(res_buffer,
-         "title=\"Circular Buffer\"",
+RESOURCE(res_cxmac,
+         "title=\"CX-MAC\";rt=\"Text\"",
          res_get_handler,
          NULL,
-         res_put_handler,
+         NULL,
          NULL);
 
 static void
 res_get_handler(void *request, void *response, uint8_t *buffer, uint16_t preferred_size, int32_t *offset)
 {
-  coap_packet_t *const coap_req = (coap_packet_t *)request;
-  
-  if(coap_req->content_format == REST.type.TEXT_PLAIN){
-    REST.set_header_content_type(response, REST.type.TEXT_PLAIN);
-    int i = 0;
-    while(tail != head && i < REST_MAX_CHUNK_SIZE){
-      buffer[i] = message_buffer[tail];
-      tail = (tail+1)%BUFFER_SIZE;
-      i++;
-    }
-    if(i != 0){
-      REST.set_response_payload(response, buffer, i);
-    } else {
-      REST.set_response_status(response, REST.status.NOT_ACCEPTABLE);
-      const char *msg = "No Data";
-      REST.set_response_payload(response, msg, strlen(msg));
-    }
-  }
-}
-
-static void
-res_put_handler(void *request, void *response, uint8_t *buffer, uint16_t preferred_size, int32_t *offset)
-{
-  coap_packet_t *const coap_req = (coap_packet_t *)request;
-  
-  if(coap_req->content_format == REST.type.TEXT_PLAIN){
-    int i = 0;
-    while(i < coap_req->payload_len){
-      message_buffer[head] = coap_req->payload[i];
-      head = (head+1)%BUFFER_SIZE;
-      if(head == tail){
-        tail++;
+  struct encounter *e;
+  int i = 0;
+  int length = 0;
+  char * buffer_head = (char *)buffer;
+  for(e = list_head(encounter_list); e != NULL; e = list_item_next(e)) {
+    sprintf((char *)buffer_head, "N:%02x%02x,T:%u",
+      e->neighbor.u8[6], e->neighbor.u8[7], (unsigned short)(e->time));
+      while(*buffer_head != '\0'){
+          buffer_head++;
+          length++;
       }
       i++;
-    }
-    message_buffer[head] = '\0';
-    REST.set_response_status(response, REST.status.CHANGED);
   }
+  if(length > REST_MAX_CHUNK_SIZE){
+    length = REST_MAX_CHUNK_SIZE;
+  }
+  REST.set_header_content_type(response, REST.type.TEXT_PLAIN);
+  REST.set_response_payload(response, buffer, length);
 }
 /**
  * @}
  * @}
  */
- 
+ #endif

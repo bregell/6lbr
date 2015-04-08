@@ -1,5 +1,5 @@
 TARGET=openmote
-CFLAGS += -DOPENMOTE_OPENBATTERY=1
+OPENMOTE_OPENBATTERY = 1
 CONTIKI_PROJECT = openbattery-er-server
 all: $(CONTIKI_PROJECT)
 
@@ -15,15 +15,19 @@ PROJECTDIRS += $(REST_RESOURCES_DIR)
 PROJECT_SOURCEFILES += $(REST_RESOURCES_FILES)
 
 # linker optimizations
-SMALL=0
+SMALL=1
 
 # REST Engine shall use Erbium CoAP implementation
 APPS += er-coap
 APPS += rest-engine
 
-#Add Drowsie
-MODULES += core/net/mac/drowsie
-MODULES += core/net/mac/cxmac
+# Add other RDC drivers
+ifdef DROWSIE
+	MODULES += core/net/mac/drowsie
+endif
+ifdef CXMAC 
+	MODULES += core/net/mac/cxmac
+endif
 
 CONTIKI_WITH_IPV6 = 1
 include $(CONTIKI)/Makefile.include
