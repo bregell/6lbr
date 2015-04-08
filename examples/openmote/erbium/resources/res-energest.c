@@ -67,9 +67,11 @@ res_get_handler(void *request, void *response, uint8_t *buffer, uint16_t preferr
 {
   unsigned int accept = -1; 
   
-  float cpu, lpm, rx, tx, lpm0, lpm1, lpm2;
-  int cpu_f, lpm_f, cpu_d, lpm_d, rx_f, rx_d, tx_f, tx_d, lpm0_f, lpm0_d, \
+  float cpu, rx, tx, lpm0, lpm1, lpm2;
+  //float lpm;
+  int cpu_f, cpu_d, rx_f, rx_d, tx_f, tx_d, lpm0_f, lpm0_d, \
     lpm1_f, lpm1_d, lpm2_f, lpm2_d;
+  //int lpm_d, lpm_f; 
   uint32_t all_cpu, all_lpm, all_time, all_lpm0, all_lpm1, all_lpm2, all_rx, all_tx;
   
   energest_flush();
@@ -95,9 +97,9 @@ res_get_handler(void *request, void *response, uint8_t *buffer, uint16_t preferr
   tx_f =(int)tx;
   tx_d = (int)((tx-(float)tx_f)*100);
   
-  lpm = ((float)all_lpm/(float)all_time)*100.0;
-  lpm_f = (int)(lpm);
-  lpm_d = (int)((lpm-(float)lpm_f)*100.0);
+  //lpm = ((float)all_lpm/(float)all_time)*100.0;
+  //lpm_f = (int)(lpm);
+  //lpm_d = (int)((lpm-(float)lpm_f)*100.0);
   
   lpm0 = ((float)all_lpm0/(float)all_lpm)*100.0;
   lpm0_f = (int)lpm0;
@@ -115,12 +117,11 @@ res_get_handler(void *request, void *response, uint8_t *buffer, uint16_t preferr
   if(accept == -1 || accept == REST.type.TEXT_PLAIN){
     REST.set_header_content_type(request, REST.type.TEXT_PLAIN);
     snprintf(
-      (char *)buffer, REST_MAX_CHUNK_SIZE, 
-      "CPU:%d.%d%% (RX:%d.%d%%, TX:%d.%d%%) , LPM:%d.%d%% (PM0:%d.%d%%, PM1:%d.%d%%, PM2:%d.%d%%)", 
+      (char *)buffer, REST_MAX_CHUNK_SIZE,
+      "CPU:%d.%d%%,RX:%d.%d%%,TX:%d.%d%%,PM0:%d.%d%%,PM1:%d.%d%%,PM2:%d.%d%%", 
       cpu_f, cpu_d,
       rx_f, rx_d,
       tx_f, tx_d,
-      lpm_f, lpm_d, 
       lpm0_f, lpm0_d,
       lpm1_f, lpm1_d,
       lpm2_f, lpm2_d
@@ -130,11 +131,10 @@ res_get_handler(void *request, void *response, uint8_t *buffer, uint16_t preferr
     REST.set_header_content_type(request, REST.type.APPLICATION_JSON);
     snprintf(
       (char *)buffer, REST_MAX_CHUNK_SIZE,
-      "{\"CPU\": {\"Total\":%d.%d, \"RX\":%d.%d, \"TX\":%d.%d}, \"LPM\": {\"Total\":%d.%d, \"PM0\":%d.%d, \"PM1\":%d.%d, \"PM2\":%d.%d}, \"Unit\":\"%%\"}",
+      "{\"CPU\":%d.%d,\"RX\":%d.%d,\"TX\":%d.%d,\"PM0\":%d.%d,\"PM1\":%d.%d,\"PM2\":%d.%d,\"Unit\":\"%%\"}",
       cpu_f, cpu_d,
       rx_f, rx_d,
       tx_f, tx_d,
-      lpm_f, lpm_d, 
       lpm0_f, lpm0_d,
       lpm1_f, lpm1_d,
       lpm2_f, lpm2_d

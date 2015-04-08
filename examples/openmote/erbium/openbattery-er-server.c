@@ -74,6 +74,8 @@ extern resource_t
   res_vdd3,
   res_energest, 
   res_buffer;
+  //res_cxmac;
+  
 
 PROCESS(er_example_server, "Erbium Example Server");
 AUTOSTART_PROCESSES(&er_example_server);
@@ -115,7 +117,9 @@ PROCESS_THREAD(er_example_server, ev, data)
   rest_activate_resource(&res_transmit_power, "info/txpower");
   rest_activate_resource(&res_energest, "info/energy");
   rest_activate_resource(&res_buffer, "data/buffer");
-
+  #ifdef CXMAC
+    rest_activate_resource(&res_cxmac, "info/cxmac");
+  #endif
 
 
   /* Define application-specific events here. */

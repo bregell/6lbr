@@ -2,6 +2,7 @@ CC2538_ENC28J60_ARCH=gpio
 PROJECTDIRS += platform/openmote
 
 MODULES += core/net/mac/drowsie
+MODULES += core/net/mac/cxmac
 
 SMALL = 0
 
