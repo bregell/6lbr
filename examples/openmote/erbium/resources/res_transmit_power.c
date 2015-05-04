@@ -77,7 +77,7 @@ res_get_handler(void *request, void *response, uint8_t *buffer, uint16_t preferr
   REST.get_header_accept(request, &accept);
   if(accept == -1 || accept == REST.type.TEXT_PLAIN){
 
-    REST.set_header_content_type(request, REST.type.TEXT_PLAIN);
+    REST.set_header_content_type(response, REST.type.TEXT_PLAIN);
     snprintf(
     (char *)buffer,
     REST_MAX_CHUNK_SIZE,
@@ -90,7 +90,7 @@ res_get_handler(void *request, void *response, uint8_t *buffer, uint16_t preferr
     strlen((char *)buffer)
   );
   } else if(accept == REST.type.APPLICATION_JSON){
-    REST.set_header_content_type(request, REST.type.APPLICATION_JSON);
+    REST.set_header_content_type(response, REST.type.APPLICATION_JSON);
     snprintf(
       (char *)buffer,
       REST_MAX_CHUNK_SIZE,
@@ -116,7 +116,7 @@ res_put_handler(void *request, void *response, uint8_t *buffer, uint16_t preferr
   char payload_buffer[20] = { 0 };
   int txpower = 0;
   
-  REST.set_header_content_type(request, REST.type.TEXT_PLAIN);
+  REST.set_header_content_type(response, REST.type.TEXT_PLAIN);
 
   if(coap_req->payload_len){
     if(coap_req->content_format == REST.type.TEXT_PLAIN){

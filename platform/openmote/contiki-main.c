@@ -67,6 +67,7 @@
 #include "ieee-addr.h"
 #include "lpm.h"
 
+#include "tps62730.h"
 #include "dev/i2c.h"
 #include "antenna.h"
 
@@ -149,7 +150,10 @@ main(void)
   lpm_init();
   rtimer_init();
   gpio_init();
-
+  
+  tps62730_init();
+  tps62730_on();
+  
   i2c_init(I2C_SDA_PORT, I2C_SDA_PIN, I2C_SCL_PORT, I2C_SCL_PIN, I2C_SCL_FAST_BUS_SPEED);
 
   leds_init();
@@ -247,7 +251,9 @@ main(void)
     } while(r > 0);
 
     /* We have serviced all pending events. Enter a Low-Power mode. */
+    tps62730_bypass();
     lpm_enter();
+    tps62730_on();
   }
 }
 /*---------------------------------------------------------------------------*/

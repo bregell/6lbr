@@ -115,7 +115,7 @@ res_get_handler(void *request, void *response, uint8_t *buffer, uint16_t preferr
     
   REST.get_header_accept(request, &accept);
   if(accept == -1 || accept == REST.type.TEXT_PLAIN){
-    REST.set_header_content_type(request, REST.type.TEXT_PLAIN);
+    REST.set_header_content_type(response, REST.type.TEXT_PLAIN);
     snprintf(
       (char *)buffer, REST_MAX_CHUNK_SIZE,
       "CPU:%d.%d%%,RX:%d.%d%%,TX:%d.%d%%,PM0:%d.%d%%,PM1:%d.%d%%,PM2:%d.%d%%", 
@@ -128,7 +128,7 @@ res_get_handler(void *request, void *response, uint8_t *buffer, uint16_t preferr
     );
     REST.set_response_payload(response, (uint8_t *)buffer, strlen((char *)buffer));
   } else if(accept == REST.type.APPLICATION_JSON){
-    REST.set_header_content_type(request, REST.type.APPLICATION_JSON);
+    REST.set_header_content_type(response, REST.type.APPLICATION_JSON);
     snprintf(
       (char *)buffer, REST_MAX_CHUNK_SIZE,
       "{\"CPU\":%d.%d,\"RX\":%d.%d,\"TX\":%d.%d,\"PM0\":%d.%d,\"PM1\":%d.%d,\"PM2\":%d.%d,\"Unit\":\"%%\"}",
